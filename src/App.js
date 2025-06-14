@@ -8,14 +8,12 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore,
-  collection,
-  addDoc,
   doc,
   getDoc
 } from 'firebase/firestore';
 import Login from './Login';
 
-// 🔥 Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD9gycJnG1u4gIi2ADZpW6rvmyZHZk3PYA",
   authDomain: "tudientrung.firebaseapp.com",
@@ -25,7 +23,7 @@ const firebaseConfig = {
   appId: "1:226406976272:web:694ba67798203a615ab395"
 };
 
-// ✅ Khởi tạo Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -34,11 +32,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tv, setTV] = useState('');
-  const [han, setHan] = useState('');
-  const [pinyin, setPinyin] = useState('');
 
-  // Theo dõi trạng thái đăng nhập
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -59,43 +53,39 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    if (!tv || !han || !pinyin) return alert('Nhập đủ thông tin');
-    try {
-      await addDoc(collection(db, 'tuvung'), {
-        tiengViet: tv,
-        hanTu: han,
-        pinyin: pinyin
-      });
-      alert('Đã lưu');
-      setTV(''); setHan(''); setPinyin('');
-    } catch (err) {
-      alert('Lỗi khi lưu từ');
-    }
-  };
-
   if (loading) return <div className="p-6 text-center">Đang kiểm tra đăng nhập...</div>;
   if (!user) return <Login onLogin={() => {}} />;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-4 text-center">📚 Từ điển tiếng Trung</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">📚 Từ điển tiếng Trung</h1>
 
       {role === "admin" ? (
-        <>
-          <form onSubmit={handleSave} className="w-full max-w-md space-y-4">
-            <input className="w-full p-2 border rounded" placeholder="Tiếng Việt" value={tv} onChange={(e) => setTV(e.target.value)} />
-            <input className="w-full p-2 border rounded" placeholder="Hán Tự" value={han} onChange={(e) => setHan(e.target.value)} />
-            <input className="w-full p-2 border rounded" placeholder="Pinyin" value={pinyin} onChange={(e) => setPinyin(e.target.value)} />
-            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Lưu từ vựng</button>
-          </form>
-        </>
+        <div className="text-left max-w-2xl">
+          <h2 className="text-xl font-semibold mb-2">🔧 Quản trị viên (Admin):</h2>
+          <ul className="list-disc list-inside space-y-1 text-gray-700">
+            <li>Xem và quản lý danh sách từ đã nhập</li>
+            <li>Thêm từ vựng mới (Tiếng Việt - Hán Tự - Pinyin)</li>
+            <li>Sửa hoặc xoá các từ sai</li>
+            <li>Phân quyền tài khoản người dùng</li>
+            <li>Thống kê hoạt động học tập của người học</li>
+          </ul>
+        </div>
       ) : (
-        <p className="text-lg text-gray-700 text-center">Chào bạn! Bạn đang dùng tài khoản học viên. Chức năng thêm từ vựng chỉ dành cho admin.</p>
+        <div className="text-left max-w-2xl">
+          <h2 className="text-xl font-semibold mb-2">🎓 Học viên:</h2>
+          <ul className="list-disc list-inside space-y-1 text-gray-700">
+            <li>Ôn tập từ vựng bằng Flashcard</li>
+            <li>Làm bài kiểm tra trắc nghiệm</li>
+            <li>Xem danh sách từ đã học</li>
+            <li>Lịch sử kiểm tra và tiến độ học</li>
+          </ul>
+        </div>
       )}
 
-      <button onClick={() => signOut(auth)} className="mt-6 text-sm text-blue-500 underline">Đăng xuất</button>
+      <button onClick={() => signOut(auth)} className="mt-6 text-sm text-blue-500 underline">
+        Đăng xuất
+      </button>
     </div>
   );
 }

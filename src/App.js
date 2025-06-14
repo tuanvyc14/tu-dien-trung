@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 import Login from './Login';
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD9gycJnG1u4gIi2ADZpW6rvmyZHZk3PYA",
   authDomain: "tudientrung.firebaseapp.com",
@@ -23,7 +22,6 @@ const firebaseConfig = {
   appId: "1:226406976272:web:694ba67798203a615ab395"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);

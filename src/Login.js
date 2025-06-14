@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase'; // 🔁 đường dẫn tới firebase config
-// Bạn cần truyền hàm onLogin(role) từ App.jsx
 
-const Login = ({ onLogin }) => {
+const auth = getAuth();
+
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,23 +11,10 @@ const Login = ({ onLogin }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    const auth = getAuth();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // ✅ Đọc role từ Firestore (collection: users, document ID: user.uid)
-      const docRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(docRef);
-
-      if (userDoc.exists()) {
-        const role = userDoc.data().role;
-        onLogin(role); // 🔁 Truyền role ra App.jsx để điều hướng
-      } else {
-        setError('Không tìm thấy quyền của tài khoản trong hệ thống.');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError('Sai email hoặc mật khẩu.');
+      setError('Sai email hoặc mật khẩu');
     }
   };
 

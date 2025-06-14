@@ -1,30 +1,10 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  getDoc
-} from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
 import Login from './Login';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD9gycJnG1u4gIi2ADZpW6rvmyZHZk3PYA",
-  authDomain: "tudientrung.firebaseapp.com",
-  projectId: "tudientrung",
-  storageBucket: "tudientrung.firebasestorage.app",
-  messagingSenderId: "226406976272",
-  appId: "1:226406976272:web:694ba67798203a615ab395"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = getAuth();
 
 function App() {
   const [user, setUser] = useState(null);
@@ -38,8 +18,7 @@ function App() {
         const docRef = doc(db, "users", firebaseUser.uid);
         const userDoc = await getDoc(docRef);
         if (userDoc.exists()) {
-          const userRole = userDoc.data().role || "user";
-          setRole(userRole);
+          setRole(userDoc.data().role || "user");
         } else {
           setRole("user");
         }
@@ -52,7 +31,7 @@ function App() {
   }, []);
 
   if (loading) return <div className="p-6 text-center">Đang kiểm tra đăng nhập...</div>;
-  if (!user) return <Login onLogin={() => {}} />;
+  if (!user) return <Login />;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">

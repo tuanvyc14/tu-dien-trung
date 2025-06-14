@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
@@ -9,9 +9,11 @@ import {
 import {
   getFirestore,
   collection,
-  addDoc
+  addDoc,
+  doc,
+  getDoc
 } from 'firebase/firestore';
-import Login from './Login'; // ✅ import đúng
+import Login from './Login';
 
 // 🔥 Firebase config
 const firebaseConfig = {
@@ -30,12 +32,30 @@ const db = getFirestore(app);
 
 function App() {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [tv, setTV] = useState('');
   const [han, setHan] = useState('');
   const [pinyin, setPinyin] = useState('');
 
+  // Theo dõi trạng thái đăng nhập
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const docRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(docRef);
+        if (userDoc.exists()) {
+          const userRole = userDoc.data().role || "user";
+          setRole(userRole);
+        } else {
+          setRole("user");
+        }
+      } else {
+        setRole(null);
+      }
+      setLoading(false);
+    });
     return () => unsubscribe();
   }, []);
 
@@ -55,17 +75,26 @@ function App() {
     }
   };
 
-  if (!user) return <Login onLogin={() => {}} />; // ❗ bạn có thể bỏ onLogin nếu không cần
+  if (loading) return <div className="p-6 text-center">Đang kiểm tra đăng nhập...</div>;
+  if (!user) return <Login onLogin={() => {}} />;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-4 text-center">📚 Từ điển tiếng Trung</h1>
-      <form onSubmit={handleSave} className="w-full max-w-md space-y-4">
-        <input className="w-full p-2 border rounded" placeholder="Tiếng Việt" value={tv} onChange={(e) => setTV(e.target.value)} />
-        <input className="w-full p-2 border rounded" placeholder="Hán Tự" value={han} onChange={(e) => setHan(e.target.value)} />
-        <input className="w-full p-2 border rounded" placeholder="Pinyin" value={pinyin} onChange={(e) => setPinyin(e.target.value)} />
-        <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Lưu từ vựng</button>
-      </form>
+
+      {role === "admin" ? (
+        <>
+          <form onSubmit={handleSave} className="w-full max-w-md space-y-4">
+            <input className="w-full p-2 border rounded" placeholder="Tiếng Việt" value={tv} onChange={(e) => setTV(e.target.value)} />
+            <input className="w-full p-2 border rounded" placeholder="Hán Tự" value={han} onChange={(e) => setHan(e.target.value)} />
+            <input className="w-full p-2 border rounded" placeholder="Pinyin" value={pinyin} onChange={(e) => setPinyin(e.target.value)} />
+            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Lưu từ vựng</button>
+          </form>
+        </>
+      ) : (
+        <p className="text-lg text-gray-700 text-center">Chào bạn! Bạn đang dùng tài khoản học viên. Chức năng thêm từ vựng chỉ dành cho admin.</p>
+      )}
+
       <button onClick={() => signOut(auth)} className="mt-6 text-sm text-blue-500 underline">Đăng xuất</button>
     </div>
   );

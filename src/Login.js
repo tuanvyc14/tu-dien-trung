@@ -1,34 +1,52 @@
 // src/Login.js
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from './firebase';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
-export default function Login({ onLogin }) {
+const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
+    const auth = getAuth();
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      onLogin();
+      await signInWithEmailAndPassword(auth, email, password);
+      onLogin(); // báo cho App là đã đăng nhập thành công
     } catch (err) {
-      setError('Sai tài khoản hoặc mật khẩu!');
+      setError('Sai email hoặc mật khẩu');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow w-80">
-        <h2 className="text-xl font-bold mb-4">Đăng nhập</h2>
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-        <input type="email" className="w-full p-2 border mb-2 rounded" placeholder="Email"
-          value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" className="w-full p-2 border mb-4 rounded" placeholder="Mật khẩu"
-          value={pass} onChange={(e) => setPass(e.target.value)} />
-        <button className="w-full bg-blue-500 text-white p-2 rounded">Đăng nhập</button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-white">
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Đăng nhập</h2>
+        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring focus:ring-blue-200"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          className="w-full p-2 mb-6 border rounded focus:outline-none focus:ring focus:ring-blue-200"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+        >
+          Đăng nhập
+        </button>
       </form>
     </div>
   );
-}
+};
+
+export default Login;
